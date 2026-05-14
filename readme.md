@@ -13,12 +13,18 @@ Before running this project, ensure you have the following set up:
 
 ### 1. Clone the repository
 ```bash
-git clone [Your Repository URL]
-cd [Your Project Directory]
+git clone [https://github.com/saharshkappa/cubed]
+cd [cubed]
 ```
 ### 2. To Compile 
 Either run the build.bash file
-or run
+or Run
 ```
 gcc cube.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+```
+
+### 3. To Run 
+Run
+```
+./a.out
 ```
