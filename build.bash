@@ -1,1 +1,1 @@
-gcc demo.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+gcc cube.c -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
