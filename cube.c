@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include <raylib.h>
 
 static void UpdateDrawFrame(void); 
@@ -21,6 +22,18 @@ void Rotation(float rotationalMatrix[3][3],Vector3 *point){
     point->z=newPoint[2]; 
 }
 
+void MatMult(float Mat1[3][3],float Mat2[3][3], float Mat3[3][3]){
+    float Ans[3][3];
+    for(int i=0;i<3;i++){
+        for(int j=0;j<3;j++){
+            Ans[i][j]=0.0;
+            for(int k=0;k<3;k++)
+                Ans[i][j]+=Mat1[i][k]*Mat2[k][j];
+        }
+    }
+    memcpy(Mat3, Ans, sizeof(Ans));
+}
+
 int main(void){
     InitWindow(800, 450, "raylib example - basic window");
     SetTargetFPS(60);
@@ -40,7 +53,7 @@ Vector2 project(Vector3 point,Vector3 camera){
 
 // Update and draw game frame
 static void UpdateDrawFrame(void){
-    static float theta=0.0;
+    static int axis=0;
     Vector3 vertices[8]={
         { 10.0f, -10.0f,  10.0f}, { 10.0f,  10.0f,  10.0f}, 
         { 10.0f, -10.0f, -10.0f}, { 10.0f,  10.0f, -10.0f},        
@@ -49,13 +62,30 @@ static void UpdateDrawFrame(void){
     };
     Vector3 camera={0.0,0.0,50.0};
 
-    
-    // //rotation
-    float rotaion[3][3]={{1,        0,              0},
-                         {0,    cos(theta), -sin(theta)},
-                         {0,    sin(theta),  cos(theta)}};
+    float theta=0.01;
+    static float rotation=0.0;
+float rotations[3][3][3]={{{     1,        0,              0},
+                              {     0,    cos(theta), -sin(theta)},
+                              {     0,    sin(theta),  cos(theta)}},
+
+                             {{cos(theta),      0,      -sin(theta)},
+                              {     0,          1,         0       },
+                              {sin(theta),      0,       cos(theta)}},
+
+                             {{cos(theta), -sin(theta),   0},
+                              {sin(theta),  cos(theta),   0},
+                              {0,               0,        1}}};
+
+
+    static float super[3][3]={{1.0, 0.0, 0.0},
+                              {0.0, 1.0, 0.0},
+                              {0.0, 0.0, 1.0}};
+
+     //rotation
+    MatMult(rotations[axis],super,super);
+   
     for(int i=0;i<8;i++)
-        Rotation(rotaion,&(vertices[i]));
+        Rotation(super,&(vertices[i]));
 
     //projection
     Vector2 projected[8];
@@ -63,16 +93,19 @@ static void UpdateDrawFrame(void){
         projected[i] = project(vertices[i],camera);
     BeginDrawing();
         ClearBackground(RAYWHITE);
-    for (int i=0;i<8;i++){
-        //printf("(%f,%f)\n",projected[i].x,projected[i].y);
+    for (int i=0;i<8;i++){  
         DrawCircleV(projected[i], 5.0,(Color){ i*50,70+50*i,160+50*i, 225 } );
         pointToDrawCube(projected);
         char text[2]={(char)(i+'0'),'\0'};
         DrawText(text, projected[i].x, projected[i].y, 10, (Color){0, 0, 0, 225});
     }
 
-    EndDrawing();
-    theta+=0.01;
+    EndDrawing(); //rotation
+    rotation+=0.01;
+    if(rotation>=PI/4){
+        rotation=0;
+        axis=(axis+1)%3;
+    }
 }
 
 void pointToDrawCube(Vector2 vertices[8]){
